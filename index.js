@@ -73,8 +73,6 @@ const initialPieces = [
   },
 ]
 
-console.log(initialPieces)
-
 class Piece {
   side = ""
   type = ""
@@ -86,6 +84,48 @@ class Piece {
     this.type = type
     this.position = position
     this.imageSrc = `${side}${type}.png`
+  }
+
+  getMovements(board) {
+    const pieceRowBoard = n.reverse().findIndex((number) => number === Number(this.position[1]))
+
+    const pieceColumnBoard = l.findIndex((letter) => letter === this.position[0])
+
+    const element = board[pieceRowBoard][pieceColumnBoard]
+    
+    if(!element || element.length === 0) return
+
+    const k = this.side === "w" ? 1 : -1;
+
+    switch(this.type) {
+      case "p":
+        let possiblePositions = [`${pieceRowBoard-1*k}${pieceColumnBoard}`, `${pieceRowBoard-2*k}${pieceColumnBoard}`]
+
+        let realPossiblePositions = []
+        for (let index = 0; index < possiblePositions.length; index++) {
+          const item = possiblePositions[index];
+          
+          let a = Number(item[0])
+          let b = Number(item[1])
+          let result = board[a][b]
+
+          if (result.side === this.side) break
+          if (result) return
+
+          realPossiblePositions.push(`${l[Number(item[1])]}${n[Number(item[0])]}`)
+        }
+
+        if(board[pieceRowBoard-1*k][pieceColumnBoard-1]) {
+          realPossiblePositions.push(`${l[pieceRowBoard-1*k]}${n[pieceColumnBoard-1]}`)
+        }
+
+        if(board[pieceRowBoard-1*k][pieceColumnBoard+1]) {
+          console.log(`${l[pieceRowBoard-1*k]}${n[pieceColumnBoard+1]}`)
+          realPossiblePositions.push(`${l[pieceColumnBoard+1]}${n[pieceRowBoard-1*k]}`)
+        }
+        
+        return realPossiblePositions;
+    }
   }
 }
 
@@ -121,10 +161,9 @@ function renderHtmlBoard(board) {
   board.map((row, rowIndex) => {
     html += '<div style="display: flex; max-height: 100%; max-width: 100%;">'
     row.map((item, itemIndex) => {
-      console.log(itemIndex)
       let background = (itemIndex+1+(Number(rowIndex % 2))) % 2 ? "#CCDAE0" : "#7A9DB2";
       if(item) {
-        html += `<div style="flex: 1; display: flex; justify-content: center; align-items: center; background: ${background}"><img src="/assets/${item.imageSrc}" /></div>`
+        html += `<div id="${item.position}" style="flex: 1; display: flex; justify-content: center; align-items: center; background: ${background}"><img src="/assets/${item.imageSrc}" /></div>`
         return
       }
       html += `<div style="flex: 1; height: 150px; width: 150px; background: ${background}"></div>`
